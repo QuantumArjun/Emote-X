@@ -59,6 +59,9 @@ def extract_feature(file_name, **kwargs):
     mel = kwargs.get("mel")
     contrast = kwargs.get("contrast")
     tonnetz = kwargs.get("tonnetz")
+    pitch_cepstrum = kwargs.get('pitch_cepstrum')
+    formants = kwargs.get('formants')
+    rmse = kwargs.get('rmse')
     with soundfile.SoundFile(file_name) as sound_file:
         X = sound_file.read(dtype="float32")
         sample_rate = sound_file.samplerate
@@ -80,6 +83,15 @@ def extract_feature(file_name, **kwargs):
         if tonnetz:
             tonnetz = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
             result = np.hstack((result, tonnetz))
+        if pitch_cepstrum:
+            pitch_cepstrum = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
+            result = np.hstack((result, pitch_cepstrum))      
+        if formants:
+            formants = np.mean(librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
+            result = np.hstack((result, formants))      
+        if rmse:
+            pitch_cepstrum = np.mean(librosa.feature.rmse(y=librosa.effects.harmonic(X), sr=sample_rate).T,axis=0)
+            result = np.hstack((result, rmse))    
     return result
 
 
