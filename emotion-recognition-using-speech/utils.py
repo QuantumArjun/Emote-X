@@ -69,75 +69,88 @@ def extract_feature(file_name, **kwargs):
     chroma_cens = kwargs.get('chroma_cens')
     poly_features = kwargs.get('poly_features')
     deriv = kwargs.get('deriv')
+    image = kwargs.get('image')
+    raw = kwargs.get('raw')
     with soundfile.SoundFile(file_name) as sound_file:
         X = sound_file.read(dtype="float32")
         sample_rate = sound_file.samplerate
-        if chroma or contrast:
+        if raw:
+            result = X
+        elif image:
             stft = np.abs(librosa.stft(X))
-        result = np.array([])
-        if mfcc:
-            mfccs = librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40)     
-            result = np.hstack((result, np.mean(mfccs.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_mfcc = librosa.feature.delta(mfccs)
-                result = np.hstack((result, np.mean(deriv_mfcc.T, axis=0)))
-        if chroma:
-            chroma = librosa.feature.chroma_stft(S=stft, sr=sample_rate)
-            result = np.hstack((result, np.mean(chroma.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_chroma = librosa.feature.delta(chroma)
-                result = np.hstack((result, np.mean(deriv_chroma.T, axis=0)))
-        if mel:
             mel = librosa.feature.melspectrogram(X, sr=sample_rate)
-            result = np.hstack((result, np.mean(mel.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_mel = librosa.feature.delta(mel)
-                result = np.hstack((result, np.mean(deriv_mel.T, axis=0)))
-        if contrast:
-            contrast = librosa.feature.spectral_contrast(S=stft, sr=sample_rate)
-            result = np.hstack((result, np.mean(contrast.T, axis = 0)))
-            #deriv
-            if deriv:
-                deriv_contrast = librosa.feature.delta(contrast)
-                result = np.hstack((result, np.mean(deriv_contrast.T, axis=0)))
-        if tonnetz:
-            tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate)
-            result = np.hstack((result, np.mean(tonnetz.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_tonnetz = librosa.feature.delta(tonnetz)
-                result = np.hstack((result, np.mean(deriv_tonnetz.T, axis=0))) 
+#             contrast = librosa.feature.spectral_contrast(S=stft, sr=sample_rate)
+#             tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate)
+#             result = np.array([mel, contrast, tonnetz])
+            result = np.array(mel)
+            
+        else:
+            if chroma or contrast:
+                stft = np.abs(librosa.stft(X))
+            result = np.array([])
+            if mfcc:
+                mfccs = librosa.feature.mfcc(y=X, sr=sample_rate, n_mfcc=40)     
+                result = np.hstack((result, np.mean(mfccs.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_mfcc = librosa.feature.delta(mfccs)
+                    result = np.hstack((result, np.mean(deriv_mfcc.T, axis=0)))
+            if chroma:
+                chroma = librosa.feature.chroma_stft(S=stft, sr=sample_rate)
+                result = np.hstack((result, np.mean(chroma.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_chroma = librosa.feature.delta(chroma)
+                    result = np.hstack((result, np.mean(deriv_chroma.T, axis=0)))
+            if mel:
+                mel = librosa.feature.melspectrogram(X, sr=sample_rate)
+                result = np.hstack((result, np.mean(mel.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_mel = librosa.feature.delta(mel)
+                    result = np.hstack((result, np.mean(deriv_mel.T, axis=0)))
+            if contrast:
+                contrast = librosa.feature.spectral_contrast(S=stft, sr=sample_rate)
+                result = np.hstack((result, np.mean(contrast.T, axis = 0)))
+                #deriv
+                if deriv:
+                    deriv_contrast = librosa.feature.delta(contrast)
+                    result = np.hstack((result, np.mean(deriv_contrast.T, axis=0)))
+            if tonnetz:
+                tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate)
+                result = np.hstack((result, np.mean(tonnetz.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_tonnetz = librosa.feature.delta(tonnetz)
+                    result = np.hstack((result, np.mean(deriv_tonnetz.T, axis=0))) 
 
-        if rmse:
-            S, phase = librosa.magphase(librosa.stft(X))
-            rmse = librosa.feature.rmse(S=S)
-            result = np.hstack((result, np.mean(rmse.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_rmse = librosa.feature.delta(rmse)
-                result = np.hstack((result, np.mean(deriv_rmse.T, axis=0))) 
-
-        if chroma_cens:
-            chroma_cens = librosa.feature.chroma_cens(y=X, sr=sample_rate)
-            result = np.hstack((result, np.mean(chroma_cens.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_chroma_cens = librosa.feature.delta(chroma_cens)
-                result = np.hstack((result, np.mean(deriv_chroma_cens.T, axis=0)))
-
-        if poly_features:
-            if not rsme:
+            if rmse:
                 S, phase = librosa.magphase(librosa.stft(X))
-            poly_features = librosa.feature.poly_features(y=S, sr=sample_rate, order=2)
-            result = np.hstack((result, np.mean(poly_features.T, axis=0)))
-            #deriv
-            if deriv:
-                deriv_poly_features = librosa.feature.delta(poly_features)
-                result = np.hstack((result, np.mean(deriv_poly_features.T, axis=0)))
-                         
+                rmse = librosa.feature.rmse(S=S)
+                result = np.hstack((result, np.mean(rmse.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_rmse = librosa.feature.delta(rmse)
+                    result = np.hstack((result, np.mean(deriv_rmse.T, axis=0))) 
+
+            if chroma_cens:
+                chroma_cens = librosa.feature.chroma_cens(y=X, sr=sample_rate)
+                result = np.hstack((result, np.mean(chroma_cens.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_chroma_cens = librosa.feature.delta(chroma_cens)
+                    result = np.hstack((result, np.mean(deriv_chroma_cens.T, axis=0)))
+
+            if poly_features:
+                if not rsme:
+                    S, phase = librosa.magphase(librosa.stft(X))
+                poly_features = librosa.feature.poly_features(y=S, sr=sample_rate, order=2)
+                result = np.hstack((result, np.mean(poly_features.T, axis=0)))
+                #deriv
+                if deriv:
+                    deriv_poly_features = librosa.feature.delta(poly_features)
+                    result = np.hstack((result, np.mean(deriv_poly_features.T, axis=0)))
+
     return result
 
 
@@ -160,7 +173,8 @@ def get_audio_config(features_list):
     `data_extractor.AudioExtractor` class
     """
     audio_config = {'mfcc': False, 'chroma': False, 'mel': False, 'contrast': False, 'tonnetz': False, 
-                   'rmse': False, 'poly_feature':False,'chroma_cens':False, 'deriv':False}
+                   'rmse': False, 'poly_feature':False,'chroma_cens':False, 'deriv':False, 
+                   'image':False, 'raw':False}
     for feature in features_list:
         if feature not in audio_config:
             raise TypeError(f"Feature passed: {feature} is not recognized.")
