@@ -77,8 +77,8 @@ def extract_feature(file_name, **kwargs):
         if raw:
             result = X
         elif image:
-            stft = np.abs(librosa.stft(X))
-            mel = librosa.feature.melspectrogram(X, sr=sample_rate)
+#             stft = np.abs(librosa.stft(X))
+            mel = librosa.feature.melspectrogram(X, sr=sample_rate, n_fft = 512,hop_length = 32)
 #             contrast = librosa.feature.spectral_contrast(S=stft, sr=sample_rate)
 #             tonnetz = librosa.feature.tonnetz(y=librosa.effects.harmonic(X), sr=sample_rate)
 #             result = np.array([mel, contrast, tonnetz])
